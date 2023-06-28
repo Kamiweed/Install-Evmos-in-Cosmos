@@ -1,39 +1,85 @@
-# Install-Evmos-in-Cosmos
-To install the Evmos module into a clean Cosmos SDK, you would need to follow these general steps:
+Evmos Installation in Cosmos
 
-1. Set up a clean Cosmos SDK: Start by setting up a new Cosmos SDK project or a clean working directory. You can find instructions on how to set up a new Cosmos SDK project in the official documentation.
+To install Evmos, a Cosmos-SDK module that enables Ethereum Virtual Machine (EVM) compatibility within a Cosmos network, you can follow these steps:
 
-2. Add Evmos module dependency: In your clean Cosmos SDK project, you'll need to add the Evmos module as a dependency. You can do this by adding the module's repository URL to the `go.mod` file of your project. Here's an example of how you can add the Evmos module using `go get` command:
+1. Set up a Cosmos-SDK environment:
+   - Make sure you have Go installed on your system. You can download it from the official Go website (https://golang.org/dl/).
+   - Set up your Go workspace by defining the `GOPATH` environment variable and adding the workspace's `bin` directory to your `PATH`. For example:
+     ```
+     export GOPATH=$HOME/go
+     export PATH=$PATH:$GOPATH/bin
+     ```
+   - Create the necessary directory structure for your Go workspace:
+     ```
+     mkdir -p $GOPATH/src/github.com/cosmos
+     cd $GOPATH/src/github.com/cosmos
+     ```
 
-   ```shell
-   go get github.com/tharsis/ethermint@v0.6.3
+2. Clone the Cosmos-SDK repository:
+   ```
+   git clone https://github.com/cosmos/cosmos-sdk.git
+   cd cosmos-sdk
    ```
 
-   This command fetches the Evmos module at version `v0.6.3` from the official repository.
-
-3. Register the Evmos module: After adding the Evmos module as a dependency, you need to register it in the Cosmos SDK. Locate the `app/app.go` file in your project, and find the `MakeEncodingConfig` function. In that function, register the Evmos module by adding the following line:
-
-   ```go
-   evmos.ModuleBasics.RegisterLegacyAminoCodec(cdc.Amino)
+3. Checkout the version of Cosmos-SDK that is compatible with Evmos:
+   ```
+   git checkout v0.44.0
    ```
 
-4. Import and configure the Evmos module: In your application's `app/app.go` file, import the necessary Evmos packages. Here's an example of how you can import the required packages:
-
-   ```go
-   import (
-   	"github.com/tharsis/ethermint/x/evm"
-   	"github.com/tharsis/ethermint/x/evm/types"
-   )
+4. Install the necessary dependencies:
+   ```
+   make tools
+   make install
    ```
 
-   Additionally, add the Evmos module to the application's module list. Locate the `defaultGenesis()` function and add the Evmos module to the module list as follows:
-
-   ```go
-   app.ModuleBasics.RegisterModule(evm.Module{})
+5. Clone the Evmos repository:
+   ```
+   cd $GOPATH/src/github.com/cosmos
+   git clone https://github.com/tharsis/evmos.git
+   cd evmos
    ```
 
-   Finally, ensure that the Evmos module is included in the application's `app.toml` file under the `enabled` modules section.
+6. Install the Evmos module:
+   ```
+   make install
+   ```
 
-5. Build and run your application: Once you have completed the above steps, you can build and run your Cosmos SDK application with the Evmos module. Use the appropriate commands based on your project's setup, such as `make`, `go build`, or any other build command specific to your project.
+7. Update the configuration files:
+   - Add the Evmos module to the list of modules in the `app/app.go` file:
+     ```go
+     // app/app.go
 
-Please note that the above steps provide a general overview of how to integrate the Evmos module into a clean Cosmos SDK project. The exact steps and configuration might vary based on the specific versions of the Cosmos SDK and Evmos module you are using. It's always recommended to refer to the official documentation and repositories of Cosmos SDK and Evmos for the most up-to-date and accurate instructions.
+     app.ModuleBasics.RegisterModule(evm.Module{})
+     ```
+
+   - Update the `config/app.toml` file to include the Evmos module:
+     ```toml
+     # config/app.toml
+
+     [modules]
+     evm = true
+     ```
+
+   - Update the `config/genesis.json` file to include the Evmos module:
+     ```json
+     {
+       "app_state": {
+         "evm": {}
+       }
+     }
+     ```
+
+8. Build and initialize your Cosmos-SDK project:
+   ```
+   make install
+   evmosd init <moniker> --chain-id <chain-id>
+   ```
+
+   Replace `<moniker>` with a name for your node, and `<chain-id>` with the desired chain ID for your network.
+
+9. Run your Evmos-enabled Cosmos-SDK node:
+   ```
+   evmosd start
+   ```
+
+Congratulations! You have successfully installed Evmos in your Cosmos-SDK project. You can now interact with the EVM-compatible functionality provided by Evmos in your Cosmos network.
